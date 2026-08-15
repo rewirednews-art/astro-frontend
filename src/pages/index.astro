@@ -2,10 +2,54 @@
 import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const supabase = Astro.locals.supabase;
+
+let connected = false;
+let statusMessage = 'Supabase not configured';
+
+if (supabase) {
+	const { count, error } = await supabase
+		.from('backend_article')
+		.select('*', { count: 'exact', head: true });
+
+	connected = !error;
+	statusMessage = error?.message ?? `Supabase connected - backend_article: ${count ?? 0} row(s)`;
+}
 ---
 
 <Layout>
+	<section id="connection-check" class:list={connected ? ['ok'] : ['error']}>
+		{connected ? (
+			<p>{statusMessage}</p>
+		) : (
+			<p>Supabase connection failed: {statusMessage}</p>
+		)}
+	</section>
 	<Welcome />
 </Layout>
+
+<style>
+	#connection-check {
+		position: fixed;
+		top: 16px;
+		left: 16px;
+		z-index: 10;
+		padding: 8px 14px;
+		border-radius: 999px;
+		font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+		font-size: 14px;
+	}
+
+	#connection-check p {
+		margin: 0;
+		color: white;
+	}
+
+	#connection-check.ok {
+		background: #16a34a;
+	}
+
+	#connection-check.error {
+		background: #dc2626;
+	}
+</style>
