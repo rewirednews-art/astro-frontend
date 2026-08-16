@@ -1,0 +1,133 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const supabase = Astro.locals.supabase;
+const { slug } = Astro.params;
+
+let article = null;
+
+if (supabase) {
+	const { data, error } = await supabase
+		.from('backend_article')
+		.select(
+			'id, title, slug, content, summary, created_at, updated_at, author:author_id(id, username, first_name, last_name)',
+		)
+		.eq('slug', slug)
+		.eq('is_published', true)
+		.maybeSingle();
+
+	article = !error ? data : null;
+}
+
+if (!article) {
+	return Astro.rewrite('/404');
+}
+
+const authorName = [article.author?.first_name, article.author?.last_name]
+	.filter(Boolean)
+	.join(' ') || article.author?.username;
+
+const publishedDate = new Date(article.created_at).toLocaleDateString('en-US', {
+	year: 'numeric',
+	month: 'long',
+	day: 'numeric',
+});
+---
+
+<Layout>
+	<article id="article">
+		<header>
+			{article.summary && <p class="summary">{article.summary}</p>}
+			<h1>{article.title}</h1>
+			<p class="meta">
+				{authorName ? <span class="author">{authorName}</span> : null}
+				<time datetime={article.created_at}>{publishedDate}</time>
+			</p>
+		</header>
+
+		{article.content && (
+			<div class="content">
+				{article.content
+					.split(/\r?\n/)
+					.filter((paragraph) => paragraph.trim().length)
+					.map((paragraph) => <p>{paragraph}</p>)}
+			</div>
+		)}
+	</article>
+
+	<footer id="back">
+		<a href="/">&larr; Back to headlines</a>
+	</footer>
+</Layout>
+
+<style>
+	#article {
+		font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+		max-width: 720px;
+		margin: 0 auto;
+		padding: 32px 24px 16px;
+	}
+
+	#article header {
+		margin-bottom: 24px;
+	}
+
+	#article h1 {
+		font-size: 32px;
+		line-height: 1.2;
+		color: #111827;
+		margin: 0 0 12px;
+	}
+
+	#article .summary {
+		color: #6b7280;
+		font-size: 18px;
+		line-height: 1.5;
+		margin: 0 0 8px;
+	}
+
+	#article .meta {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		color: #6b7280;
+		font-size: 14px;
+		margin: 0;
+	}
+
+	#article .meta .author {
+		color: #374151;
+		font-weight: 600;
+	}
+
+	#article .meta .author::after {
+		content: '·';
+		margin-left: 8px;
+		font-weight: 400;
+		color: #9ca3af;
+	}
+
+	#article .content p {
+		color: #374151;
+		font-size: 18px;
+		line-height: 1.7;
+		margin: 0 0 1em;
+	}
+
+	#back {
+		max-width: 720px;
+		margin: 0 auto;
+		padding: 0 24px 32px;
+	}
+
+	#back a {
+		font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+		color: #111827;
+		text-decoration: none;
+		font-size: 15px;
+	}
+
+	#back a:hover {
+		text-decoration: underline;
+	}
+</style>
