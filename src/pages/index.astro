@@ -6,14 +6,19 @@ const supabase = Astro.locals.supabase;
 
 let connected = false;
 let statusMessage = 'Supabase not configured';
+let articles = [];
 
 if (supabase) {
-	const { count, error } = await supabase
+	const { data, error } = await supabase
 		.from('backend_article')
-		.select('*', { count: 'exact', head: true });
+		.select('id, title, slug, link, created_at')
+		.eq('is_published', true)
+		.order('created_at', { ascending: false })
+		.limit(25);
 
 	connected = !error;
-	statusMessage = error?.message ?? `Supabase connected - backend_article: ${count ?? 0} row(s)`;
+	statusMessage = error?.message ?? `Supabase connected - backend_article: ${data?.length ?? 0} row(s)`;
+	articles = data ?? [];
 }
 ---
 
@@ -26,6 +31,20 @@ if (supabase) {
 		)}
 	</section>
 	<Welcome />
+	<section id="headlines">
+		<h2>Headlines</h2>
+		{articles.length ? (
+			<ul>
+				{articles.map((article) => (
+					<li>
+						<a href={article.link ?? `/articles/${article.slug}`}>{article.title}</a>
+					</li>
+				))}
+			</ul>
+		) : (
+			<p>No published articles.</p>
+		)}
+	</section>
 </Layout>
 
 <style>
@@ -43,6 +62,39 @@ if (supabase) {
 	#connection-check p {
 		margin: 0;
 		color: white;
+	}
+
+	#headlines {
+		font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+		padding: 16px 24px 24px;
+		max-width: 720px;
+		margin: 0 auto;
+	}
+
+	#headlines h2 {
+		font-size: 24px;
+	}
+
+	#headlines ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	#headlines li {
+		padding: 10px 0;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	#headlines a {
+		color: #111827;
+		text-decoration: none;
+		font-size: 17px;
+		line-height: 1.4;
+	}
+
+	#headlines a:hover {
+		text-decoration: underline;
 	}
 
 	#connection-check.ok {
