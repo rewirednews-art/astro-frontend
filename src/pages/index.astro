@@ -1,5 +1,5 @@
 ---
-import Welcome from '../components/Welcome.astro';
+
 import Layout from '../layouts/Layout.astro';
 
 const supabase = Astro.locals.supabase;
@@ -30,7 +30,7 @@ if (supabase) {
 			<p>Supabase connection failed: {statusMessage}</p>
 		)}
 	</section>
-	<Welcome />
+	
 	<section id="headlines">
 		<h2>Headlines</h2>
 		{articles.length ? (
