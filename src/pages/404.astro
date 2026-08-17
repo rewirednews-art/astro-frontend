@@ -1,0 +1,41 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+	<main id="notfound">
+		<h1>404</h1>
+		<p>This article could not be found.</p>
+		<a href="/">&larr; Back to headlines</a>
+	</main>
+</Layout>
+
+<style>
+	#notfound {
+		font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+		max-width: 720px;
+		margin: 0 auto;
+		padding: 64px 24px;
+		text-align: center;
+	}
+
+	#notfound h1 {
+		font-size: 48px;
+		margin: 0 0 8px;
+		color: #111827;
+	}
+
+	#notfound p {
+		color: #6b7280;
+		margin: 0 0 24px;
+	}
+
+	#notfound a {
+		color: #111827;
+		text-decoration: none;
+	}
+
+	#notfound a:hover {
+		text-decoration: underline;
+	}
+</style>
